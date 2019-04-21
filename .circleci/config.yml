@@ -37,4 +37,27 @@ jobs:
       - run: yarn test
 
       # compile build files
-      # - run: yarn build
+      - run: yarn build
+
+      - setup_remote_docker
+
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache py-pip
+            pip install docker-compose awscli
+
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build -t jb-home .
+
+      - deploy:
+          name: Push application Docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              login="$(aws ecr get-login --no-include-email --region ap-southeast-2)"
+              ${login}
+              docker tag jb-home:latest "${ECR_ENDPOINT}/jb-home:latest" "${ECR_ENDPOINT}/jb-home:${CIRCLE_SHA1}"
+              docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
+            fi
