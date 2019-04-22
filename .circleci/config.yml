@@ -43,7 +43,6 @@ workflows:
     jobs:
       - compile_app
       - aws-ecr/build_and_push_image:
-          executor: build_env
           requires:
             - compile_app
           account-url: AWS_ACCOUNT_URL
