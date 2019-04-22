@@ -34,7 +34,9 @@ jobs:
       # compile build files
       - run: yarn build
       - persist_to_workspace:
-        root: ~/repo
+          root: ~/repo
+          paths:
+            - build/*
 
 workflows:
   build-and-push:
