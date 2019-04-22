@@ -14,7 +14,7 @@ executors:
     working_directory: ~/repo
 
 jobs:
-  build_app:
+  compile_app:
     executor: build_env
     steps:
       - checkout
@@ -33,14 +33,16 @@ jobs:
       # - run: yarn test
       # compile build files
       - run: yarn build
+      - persist_to_workspace:
+        root: ~/repo
 
 workflows:
   build-and-push:
     jobs:
-      - build_app
+      - compile_app
       - aws-ecr/build_and_push_image:
           requires:
-            - build_app
+            - compile_app
           account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: ${AWS_DEFAULT_REGION}
