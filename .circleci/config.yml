@@ -2,62 +2,49 @@
 #
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
-version: 2
-jobs:
-  build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/node:10.15.3
+version: 2.1
+orbs:
+  aws-ecr: circleci/aws-ecr@0.0.2
+workflows:
+  build-and-deploy:
+    jobs:
+      build_app:
+        docker:
+          # specify the version you desire here
+          - image: circleci/node:10.15.3
 
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/mongo:3.4.4
+          # Specify service dependencies here if necessary
+          # CircleCI maintains a library of pre-built images
+          # documented at https://circleci.com/docs/2.0/circleci-images/
+          # - image: circleci/mongo:3.4.4
 
-    working_directory: ~/repo
+        working_directory: ~/repo
 
-    steps:
-      - checkout
+        steps:
+          - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+          # Download and cache dependencies
+          - restore_cache:
+              keys:
+                - v1-dependencies-{{ checksum "package.json" }}
+                # fallback to using the latest cache if no exact match is found
+                - v1-dependencies-
 
-      - run: yarn install
+          - run: yarn install
 
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          - save_cache:
+              paths:
+                - node_modules
+              key: v1-dependencies-{{ checksum "package.json" }}
 
-      # run tests!
-      - run: yarn test
+          # run tests!
+          - run: yarn test
 
-      # compile build files
-      - run: yarn build
+          # compile build files
+          - run: yarn build
 
-      - setup_remote_docker
-
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache py-pip
-            pip install docker-compose awscli
-
-      - run:
-          name: Build application Docker image
-          command: |
-            docker build -t jb-home .
-
-      - deploy:
-          name: Push application Docker image
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              login="$(aws ecr get-login --no-include-email --region ap-southeast-2)"
-              ${login}
-              docker tag jb-home:latest "${ECR_ENDPOINT}/jb-home:latest" "${ECR_ENDPOINT}/jb-home:${CIRCLE_SHA1}"
-              docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-            fi
+      - aws-ecr/build_and_push_image:
+          account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          repo: "${AWS_RESOURCE_NAME_PREFIX}"
+          region: ${AWS_DEFAULT_REGION}
+          tag: "${CIRCLE_SHA1}"
