@@ -39,7 +39,6 @@ workflows:
     jobs:
       - build_app
       - aws-ecr/build_and_push_image:
-          executor: build_env
           requires:
             - build_app
           account-url: "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
