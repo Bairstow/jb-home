@@ -44,10 +44,10 @@ jobs:
           name: Trigger the Build Job
           command: |
             printf "Triggering an $TRIGGER_PROJECT build on the $TRIGGER_BRANCH branch\n\n"
-            printf "https://circleci.com/api/v1/project/$ORGANISATION/$TRIGGER_PROJECT/tree/$TRIGGER_BRANCH"
+            printf "https://circleci.com/api/v1.1/project/gh/$ORGANISATION/$TRIGGER_PROJECT"
 
             BUILD_INFO=$(curl -X POST \
-                "https://circleci.com/api/v1/project/$ORGANISATION/$TRIGGER_PROJECT/tree/$TRIGGER_BRANCH?circle-token=$CIRCLE_TOKEN")
+                "https://circleci.com/api/v1.1/project/gh/$ORGANISATION/$TRIGGER_PROJECT?circle-token=$CIRCLE_TOKEN")
 
             printf "\n\nBuild triggered\n\n"
             printf "Follow the progress of the build on \nhttps://circleci.com/gh/$ORGANISATION/$TRIGGER_PROJECT/tree/$TRIGGER_BRANCH"
