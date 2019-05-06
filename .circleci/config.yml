@@ -64,4 +64,7 @@ workflows:
           region: AWS_DEFAULT_REGION
           attach-workspace: true
           workspace-root: ~/project
-      - trigger_build
+      - trigger_build:
+          requires:
+            - aws-ecr/build_and_push_image
+
