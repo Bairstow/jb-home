@@ -36,7 +36,7 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths:
-            - build/*
+            - public/*
   trigger_build:
     executor: build_env
     steps:
@@ -63,7 +63,7 @@ workflows:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: AWS_DEFAULT_REGION
           attach-workspace: true
-          workspace-root: ~/project
+          workspace-root: ~/public
       - trigger_build:
           requires:
             - aws-ecr/build_and_push_image
